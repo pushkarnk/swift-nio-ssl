@@ -101,10 +101,10 @@ final class UnwrappingTests: XCTestCase {
         XCTAssertNoThrow(try clientChannel.pipeline.add(handler: handshakeHandler).wait())
 
         // Mark the closure of the channels.
-        clientChannel.closeFuture.whenComplete {
+        clientChannel.closeFuture.whenComplete { _ in
             clientClosed = true
         }
-        serverChannel.closeFuture.whenComplete {
+        serverChannel.closeFuture.whenComplete { _ in
             serverClosed = true
         }
 
@@ -114,8 +114,8 @@ final class UnwrappingTests: XCTestCase {
 
         // Let's unwrap the client connection. With no additional configuration, this will cause the server
         // to close. The client will not close because interactInMemory does not propagate closure.
-        let stopPromise: EventLoopPromise<Void> = clientChannel.eventLoop.newPromise()
-        stopPromise.futureResult.whenComplete {
+        let stopPromise: EventLoopPromise<Void> = clientChannel.eventLoop.makePromise()
+        stopPromise.futureResult.whenComplete { _ in
             unwrapped = true
         }
         clientHandler.stopTLS(promise: stopPromise)
@@ -160,10 +160,10 @@ final class UnwrappingTests: XCTestCase {
         XCTAssertNoThrow(try clientChannel.pipeline.add(handler: handshakeHandler).wait())
 
         // Mark the closure of the channels.
-        clientChannel.closeFuture.whenComplete {
+        clientChannel.closeFuture.whenComplete { _ in
             clientClosed = true
         }
-        serverChannel.closeFuture.whenComplete {
+        serverChannel.closeFuture.whenComplete { _ in
             serverClosed = true
         }
 
@@ -173,14 +173,14 @@ final class UnwrappingTests: XCTestCase {
 
         // Let's unwrap the client connection and the server connection at the same time. This should
         // not close either channel.
-        let clientStopPromise: EventLoopPromise<Void> = clientChannel.eventLoop.newPromise()
-        clientStopPromise.futureResult.whenComplete {
+        let clientStopPromise: EventLoopPromise<Void> = clientChannel.eventLoop.makePromise()
+        clientStopPromise.futureResult.whenComplete { _ in
             clientUnwrapped = true
         }
         clientHandler.stopTLS(promise: clientStopPromise)
 
-        let serverStopPromise: EventLoopPromise<Void> = serverChannel.eventLoop.newPromise()
-        serverStopPromise.futureResult.whenComplete {
+        let serverStopPromise: EventLoopPromise<Void> = serverChannel.eventLoop.makePromise()
+        serverStopPromise.futureResult.whenComplete { _ in
             serverUnwrapped = true
         }
         serverHandler.stopTLS(promise: serverStopPromise)
@@ -226,7 +226,7 @@ final class UnwrappingTests: XCTestCase {
         XCTAssertNoThrow(try clientChannel.pipeline.add(handler: handshakeHandler).wait())
 
         // Mark the closure of the client.
-        clientChannel.closeFuture.whenComplete {
+        clientChannel.closeFuture.whenComplete { _ in
             clientClosed = true
         }
 
@@ -235,7 +235,7 @@ final class UnwrappingTests: XCTestCase {
         XCTAssertTrue(handshakeHandler.handshakeSucceeded)
 
         // Let's unwrap the client connection.
-        let clientStopPromise: EventLoopPromise<Void> = clientChannel.eventLoop.newPromise()
+        let clientStopPromise: EventLoopPromise<Void> = clientChannel.eventLoop.makePromise()
         clientStopPromise.futureResult.map {
             XCTFail("Must not succeed")
         }.whenFailure { error in
@@ -245,7 +245,7 @@ final class UnwrappingTests: XCTestCase {
         clientHandler.stopTLS(promise: clientStopPromise)
 
         // Now we're going to close the client.
-        clientChannel.close().whenComplete {
+        clientChannel.close().whenComplete { _ in
             XCTAssertFalse(clientClosed)
             XCTAssertTrue(clientUnwrapped)
         }
@@ -285,7 +285,7 @@ final class UnwrappingTests: XCTestCase {
         XCTAssertNoThrow(try clientChannel.pipeline.add(handler: handshakeHandler).wait())
 
         // Mark the closure of the client.
-        clientChannel.closeFuture.whenComplete {
+        clientChannel.closeFuture.whenComplete { _ in
             clientClosed = true
         }
 
@@ -294,7 +294,7 @@ final class UnwrappingTests: XCTestCase {
         XCTAssertTrue(handshakeHandler.handshakeSucceeded)
 
         // Let's unwrap the client connection.
-        let clientStopPromise: EventLoopPromise<Void> = clientChannel.eventLoop.newPromise()
+        let clientStopPromise: EventLoopPromise<Void> = clientChannel.eventLoop.makePromise()
         clientStopPromise.futureResult.map {
             XCTFail("Must not succeed")
         }.whenFailure { error in
@@ -342,9 +342,9 @@ final class UnwrappingTests: XCTestCase {
         XCTAssertTrue(handshakeHandler.handshakeSucceeded)
 
         // Let's unwrap the client connection twice. We'll ignore the first promise.
-        let dummyPromise: EventLoopPromise<Void> = clientChannel.eventLoop.newPromise()
-        let stopPromise: EventLoopPromise<Void> = clientChannel.eventLoop.newPromise()
-        stopPromise.futureResult.whenComplete {
+        let dummyPromise: EventLoopPromise<Void> = clientChannel.eventLoop.makePromise()
+        let stopPromise: EventLoopPromise<Void> = clientChannel.eventLoop.makePromise()
+        stopPromise.futureResult.whenComplete { _ in
             promiseCalled = true
         }
         clientHandler.stopTLS(promise: dummyPromise)
@@ -380,8 +380,8 @@ final class UnwrappingTests: XCTestCase {
         XCTAssertTrue(handshakeHandler.handshakeSucceeded)
 
         // Let's unwrap the client connection twice. We'll only send a promise the second time.
-        let stopPromise: EventLoopPromise<Void> = clientChannel.eventLoop.newPromise()
-        stopPromise.futureResult.whenComplete {
+        let stopPromise: EventLoopPromise<Void> = clientChannel.eventLoop.makePromise()
+        stopPromise.futureResult.whenComplete { _ in
             promiseCalled = true
         }
         clientHandler.stopTLS(promise: nil)
@@ -408,8 +408,8 @@ final class UnwrappingTests: XCTestCase {
         channel.pipeline.assertContains(handler: handler)
 
         // Let's unwrap. This should succeed easily.
-        let stopPromise: EventLoopPromise<Void> = channel.eventLoop.newPromise()
-        stopPromise.futureResult.whenComplete {
+        let stopPromise: EventLoopPromise<Void> = channel.eventLoop.makePromise()
+        stopPromise.futureResult.whenComplete { _ in
             promiseCalled = true
         }
 
@@ -443,8 +443,8 @@ final class UnwrappingTests: XCTestCase {
         XCTAssertTrue(handshakeHandler.handshakeSucceeded)
 
         // Let's unwrap the client connection.
-        let stopPromise: EventLoopPromise<Void> = clientChannel.eventLoop.newPromise()
-        stopPromise.futureResult.whenComplete {
+        let stopPromise: EventLoopPromise<Void> = clientChannel.eventLoop.makePromise()
+        stopPromise.futureResult.whenComplete { _ in
             promiseCalled = true
         }
         clientHandler.stopTLS(promise: stopPromise)
@@ -454,7 +454,7 @@ final class UnwrappingTests: XCTestCase {
         XCTAssertTrue(promiseCalled)
 
         // Now, let's unwrap it again.
-        let secondPromise: EventLoopPromise<Void> = clientChannel.eventLoop.newPromise()
+        let secondPromise: EventLoopPromise<Void> = clientChannel.eventLoop.makePromise()
         clientHandler.stopTLS(promise: secondPromise)
         do {
             try secondPromise.futureResult.wait()
@@ -491,7 +491,7 @@ final class UnwrappingTests: XCTestCase {
         XCTAssertNoThrow(try interactInMemory(clientChannel: clientChannel, serverChannel: serverChannel))
 
         // We haven't spun the event loop, so the handlers are still in the pipeline. Now attempt to unwrap.
-        let stopPromise: EventLoopPromise<Void> = clientChannel.eventLoop.newPromise()
+        let stopPromise: EventLoopPromise<Void> = clientChannel.eventLoop.makePromise()
         clientHandler.stopTLS(promise: stopPromise)
 
         do {
@@ -526,7 +526,7 @@ final class UnwrappingTests: XCTestCase {
         XCTAssertNoThrow(try clientChannel.pipeline.add(handler: handshakeHandler).wait())
 
         // Mark the closure of the client.
-        clientChannel.closeFuture.whenComplete {
+        clientChannel.closeFuture.whenComplete { _ in
             clientClosed = true
         }
 
@@ -535,7 +535,7 @@ final class UnwrappingTests: XCTestCase {
         XCTAssertTrue(handshakeHandler.handshakeSucceeded)
 
         // Let's unwrap the client connection.
-        let clientStopPromise: EventLoopPromise<Void> = clientChannel.eventLoop.newPromise()
+        let clientStopPromise: EventLoopPromise<Void> = clientChannel.eventLoop.makePromise()
         clientStopPromise.futureResult.map {
             XCTFail("Must not succeed")
         }.whenFailure { error in
@@ -612,7 +612,7 @@ final class UnwrappingTests: XCTestCase {
 
         // We haven't spun the event loop, so the handlers are still in the pipeline. Now attempt to unwrap.
         var unwrapped = false
-        let stopPromise: EventLoopPromise<Void> = clientChannel.eventLoop.newPromise()
+        let stopPromise: EventLoopPromise<Void> = clientChannel.eventLoop.makePromise()
         stopPromise.futureResult.whenSuccess {
             XCTAssertTrue(writeCompleted)
             unwrapped = true
@@ -662,7 +662,7 @@ final class UnwrappingTests: XCTestCase {
 
         // We haven't spun the event loop, so the handlers are still in the pipeline. Now attempt to unwrap.
         var unwrapped = false
-        let stopPromise: EventLoopPromise<Void> = clientChannel.eventLoop.newPromise()
+        let stopPromise: EventLoopPromise<Void> = clientChannel.eventLoop.makePromise()
         stopPromise.futureResult.whenFailure { error in
             switch error as? OpenSSLError {
             case .some(.sslError):
@@ -704,7 +704,7 @@ final class UnwrappingTests: XCTestCase {
         XCTAssertNoThrow(try clientChannel.pipeline.add(handler: clientHandler).wait())
         let handshakeHandler = HandshakeCompletedHandler()
         XCTAssertNoThrow(try clientChannel.pipeline.add(handler: handshakeHandler).wait())
-        let readPromise: EventLoopPromise<ByteBuffer> = clientChannel.eventLoop.newPromise()
+        let readPromise: EventLoopPromise<ByteBuffer> = clientChannel.eventLoop.makePromise()
         XCTAssertNoThrow(try clientChannel.pipeline.add(handler: PromiseOnReadHandler(promise: readPromise)).wait())
 
         var readCompleted = false
@@ -720,7 +720,7 @@ final class UnwrappingTests: XCTestCase {
         // Let's unwrap the client connection. With no additional configuration, this will cause the server
         // to close. The client will not close because interactInMemory does not propagate closure.
         var unwrapped = false
-        let stopPromise: EventLoopPromise<Void> = clientChannel.eventLoop.newPromise()
+        let stopPromise: EventLoopPromise<Void> = clientChannel.eventLoop.makePromise()
         stopPromise.futureResult.whenSuccess {
             unwrapped = true
         }

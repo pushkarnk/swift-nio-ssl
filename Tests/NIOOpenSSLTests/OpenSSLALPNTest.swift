@@ -46,7 +46,7 @@ class OpenSSLALPNTest: XCTestCase {
             XCTAssertNoThrow(try group.syncShutdownGracefully())
         }
 
-        let completionPromise: EventLoopPromise<ByteBuffer> = group.next().newPromise()
+        let completionPromise: EventLoopPromise<ByteBuffer> = group.next().makePromise()
         let serverHandler = EventRecorderHandler<TLSUserEvent>()
 
         let serverChannel = try serverTLSChannel(context: serverContext,
