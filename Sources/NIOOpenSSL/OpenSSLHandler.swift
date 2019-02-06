@@ -165,7 +165,7 @@ public class OpenSSLHandler : ChannelInboundHandler, ChannelOutboundHandler {
             // We're in the process of TLS shutdown, so let's let that happen. However,
             // we want to cascade the result of the first request into this new one.
             if let promise = promise, let closePromise = self.closePromise {
-                closePromise.futureResult.cascade(promise: promise)
+                closePromise.futureResult.cascade(to: promise)
             } else if let promise = promise {
                 self.closePromise = promise
             }
@@ -175,7 +175,7 @@ public class OpenSSLHandler : ChannelInboundHandler, ChannelOutboundHandler {
             // closing is a more extreme activity than unwrapping.
             self.state = .closing
             if let promise = promise, let closePromise = self.closePromise {
-                closePromise.futureResult.cascade(promise: promise)
+                closePromise.futureResult.cascade(to: promise)
             } else if let promise = promise {
                 self.closePromise = promise
             }
@@ -448,7 +448,7 @@ public class OpenSSLHandler : ChannelInboundHandler, ChannelOutboundHandler {
         }
 
         if let promise = shutdownPromise {
-            removalFuture.cascade(promise: promise)
+            removalFuture.cascade(to: promise)
         }
 
         // Ok, we've unwrapped. Let's get out of the channel.
@@ -503,7 +503,7 @@ extension OpenSSLHandler {
         case .unwrapping, .closing:
             // We're shutting down here. Nothing has to be done, but we should keep track of this promise.
             if let promise = promise, let shutdownPromise = self.shutdownPromise {
-                shutdownPromise.futureResult.cascade(promise: promise)
+                shutdownPromise.futureResult.cascade(to: promise)
             } else if let promise = promise {
                 self.shutdownPromise = promise
             }
@@ -591,7 +591,7 @@ extension OpenSSLHandler {
 
         func flushWrites() {
             let ourPromise: EventLoopPromise<Void> = ctx.eventLoop.makePromise()
-            promises.forEach { ourPromise.futureResult.cascade(promise: $0) }
+            promises.forEach { ourPromise.futureResult.cascade(to: $0) }
             writeDataToNetwork(ctx: ctx, promise: ourPromise)
             promises = []
         }
